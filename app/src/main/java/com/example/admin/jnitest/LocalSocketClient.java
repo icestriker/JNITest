@@ -15,7 +15,7 @@ import java.io.PrintWriter;
 
 public class LocalSocketClient {
     private static final String TAG = "Client:";
-    private static final String name = "com.repackaging.localsocket";
+    private static final String name = "localsocket";
     private static LocalSocket Client = null;
     private static PrintWriter os = null;
     private static BufferedReader is = null;

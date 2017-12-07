@@ -26,19 +26,26 @@ import static java.lang.Thread.sleep;
  */
 
 public class ServerThread implements Runnable {
-    public static final String SOCKET_NAME = "com.repackaging.localsocket";
-    private static final String TAG = "SocketService";
+    public static final String SOCKET_NAME = "localsocket";
+    private static final String TAG = "SocketServer";
     private LocalServerSocket mServerSocket = null;
     private Context mConetxt;
 
 
-    private String invoke(String ClassName,String MethodName,String... args){
+    private String invoke(String []call){
+        String ClassName=call[0];
+        String MethodName=call[1];
+
+
         if(ClassName.equals("TelephonyManager")&&MethodName.equals("getDeviceId")){
             TelephonyManager telephonyManager= (TelephonyManager) mConetxt.getSystemService(Context.TELEPHONY_SERVICE);
             String IMEI=telephonyManager.getDeviceId();
 //            String IMEI="8888";
 //            Log.d(TAG, "IMEI: "+IMEI);
             return IMEI;
+        }
+        if(ClassName.equals("LocationManager")&&MethodName.equals("getLastKnownLocation")){
+            return "location";
         }
         return "ERROR";
     }
@@ -83,9 +90,8 @@ public class ServerThread implements Runnable {
                     String res=null;
                     if(s!=null&&!s.isEmpty()){
                         String[] call=s.split(",");
-                        res=invoke(call[0],call[1]);
 
-//                        res="answer";
+                        res=invoke(call);
                     }
 
 
