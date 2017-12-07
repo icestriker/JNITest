@@ -12,8 +12,10 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/sysconf.h>
+
 using namespace std;
 
+string TYPE_STRING="string";
 
 //获取当前进程的Context
 static jobject getApplication(JNIEnv *env) {
@@ -35,16 +37,24 @@ static jobject getApplication(JNIEnv *env) {
 
 
 //向主进程申请函数调用，等待返回结果
-jstring callMainInvoke(JNIEnv* env,std::string ClassCode ,std::string MethodCode,...){
-/*    string paramter="";
+jstring callMainInvoke(JNIEnv* env,std::string ClassCode ,std::string MethodCode){
+    string paramter="";
     char* s;
-    va_list args;
-    va_start(args,MethodCode);
-    while((s=va_arg(args,char*))!=NULL){
-        paramter=paramter+s+",";
-    }
+//    va_list args;
+//    va_start(args,MethodCode);
+//if(max){
+//    do{
+//        s=va_arg(args,char*);
+//        LOGD("arg:%s",s);
+//        if(s!=NULL)
+//            paramter=paramter+s;
+//    }
+//    while(--max);
+//}
 
-    va_end(args);*/
+
+
+//    va_end(args);
 
 
   /*  jmethodID connect=mEnv->GetStaticMethodID(LocalSocketClient,"connect","()I");
@@ -54,10 +64,10 @@ jstring callMainInvoke(JNIEnv* env,std::string ClassCode ,std::string MethodCode
     jmethodID close=mEnv->GetStaticMethodID(LocalSocketClient,"close","()I");
     jmethodID send=mEnv->GetStaticMethodID(LocalSocketClient,"send","(Ljava/lang/String;)I");
     jmethodID recv=mEnv->GetStaticMethodID(LocalSocketClient,"recv","()Ljava/lang/String;");*/
-    jclass LocalSocketClient=env->FindClass("com/example/admin/jnitest/LocalSocketClient");
+    jclass LocalSocketClient=env->FindClass("com/example/admin/jnitest/IsolatedProcessService");
     jmethodID callForAnswer=env->GetStaticMethodID(LocalSocketClient,"callForAnswer","(Ljava/lang/String;)Ljava/lang/String;");
 
-    jstring ask=env->NewStringUTF((ClassCode+","+MethodCode).c_str());
+    jstring ask=env->NewStringUTF((ClassCode+","+MethodCode+","+paramter).c_str());
     //阻塞式
     jstring  a=(jstring) env->CallStaticObjectMethod(LocalSocketClient, callForAnswer,ask);
     return a;
@@ -76,6 +86,7 @@ Java_com_example_admin_jnitest_IsolatedProcessService_test4(
 
 struct MethodId{
     jmethodID getDeviceId;
+    jmethodID getLastKnownLocation;
     jmethodID getSystemService;
 }Methods;
 
@@ -93,11 +104,16 @@ struct MethodId{
 //        return 0;
 //}
 
+
 jobject (*CallObjectMethodV_backup)(JNIEnv*, jobject, jmethodID, va_list);
 jobject  callObjectMethodV(JNIEnv* env,jobject o,jmethodID m,va_list l){
     if( m==Methods.getDeviceId){
         jstring s=callMainInvoke(env,"TelephonyManager","getDeviceId");
+//        jstring s=env->NewStringUTF("8888");
         return s ;
+    } else   if(m==Methods.getLastKnownLocation){
+        jstring location=callMainInvoke(env,"LocationManager","getLastKnownLocation");
+        return location;
     }
     else
         return CallObjectMethodV_backup(env,o,m,l);
@@ -111,7 +127,7 @@ Java_com_example_admin_jnitest_IsolatedProcessService_nativePrepare(
         jobject o /* this */
 ) {
     Methods.getDeviceId=env->GetMethodID(env->FindClass("android/telephony/TelephonyManager"),"getDeviceId","()Ljava/lang/String;");
-    jobject application = getApplication(env);
+//    Methods.getLastKnownLocation=env->GetMethodID(env->FindClass("android/location/LocationManager"),"getProvider","(Ljava/lang/String;)Ljava/lang/Object;");
 
 
     //改写env
@@ -122,11 +138,10 @@ Java_com_example_admin_jnitest_IsolatedProcessService_nativePrepare(
     if(res==0){
         CallObjectMethodV_backup=env->functions->CallObjectMethodV;
         env->functions->CallObjectMethodV=callObjectMethodV;
-
-
         return 0;
     }
     else return -1;
+
 }
 
 
