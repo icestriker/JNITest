@@ -1,0 +1,14 @@
+TelephonyManager,getDeviceId
+PackageManager,getInstalledApplications
+PackageManager,getPackageInfo
+AccountManager,getAccounts
+SharedPreferences,edit
+SharedPreferences,getString
+AssetManager,open 
+ClipboardManager,getPrimaryClip 
+NotificationManager,notify 
+CameraManager,openCamera 
+SmsManager,sendTextMessage 
+ContentResolver,insert 
+ContentResolver,query 
+LocationManager,getLastKnownLocation 

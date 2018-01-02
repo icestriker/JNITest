@@ -27,6 +27,7 @@ static jobject getApplication(JNIEnv *env) {
 }
 
 
+
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_example_admin_jnitest_MainActivity_getIMEIFromJNI(
